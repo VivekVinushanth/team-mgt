@@ -1,0 +1,18 @@
+{
+  "name": "team-status-tracker",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start -p ${PORT:-3000}"
+  },
+  "dependencies": {
+    "next": "14.2.5",
+    "@asgardeo/auth-react": "5.5.0",
+    "jose": "5.9.6",
+    "octokit": "3.2.1",
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
+  }
+}
