@@ -3,6 +3,11 @@ const path = require("path");
 module.exports = {
   reactStrictMode: true,
 
+  // Pin the workspace root to this project. Next otherwise walks up looking
+  // for a lockfile and can settle on a directory outside the repo, which
+  // makes build traces depend on whatever else is on the machine.
+  outputFileTracingRoot: __dirname,
+
   // Next externalizes node_modules in the server build, requiring them
   // straight from disk — which bypasses resolve.alias. Transpiling this one
   // brings it into the bundle so the server-side alias below can replace it.
