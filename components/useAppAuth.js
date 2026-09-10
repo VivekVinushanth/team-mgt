@@ -1,6 +1,6 @@
 import { useAuthContext } from "@asgardeo/auth-react";
 import { useEffect, useState } from "react";
-import { ASGARDEO_GROUP_TO_ROLE, ALLOWED_EMAIL_DOMAIN } from "../lib/config";
+import { rolesFromClaims, ALLOWED_EMAIL_DOMAIN } from "../lib/config";
 
 export function useAppAuth() {
   const { state, signIn, signOut, getIDToken } = useAuthContext();
@@ -20,13 +20,10 @@ export function useAppAuth() {
       // which re-verifies the token's signature on every API call.
       const payload = JSON.parse(atob(token.split(".")[1]));
       const email = payload.email || payload.username || "";
-      const rawGroups = payload.groups
-        ? Array.isArray(payload.groups) ? payload.groups : [payload.groups]
-        : [];
       setClaims({
         email,
         name: payload.name || email,
-        roles: rawGroups.map((g) => ASGARDEO_GROUP_TO_ROLE[g]).filter(Boolean),
+        roles: rolesFromClaims(payload),
         allowedDomain: email.toLowerCase().endsWith(`@${ALLOWED_EMAIL_DOMAIN}`),
       });
     });
