@@ -101,8 +101,20 @@ export default function Dashboard() {
             Access restricted
           </h1>
           <p style={{ color: "#475569", lineHeight: 1.6, margin: "0 0 20px" }}>
-            This app is limited to @{ALLOWED_EMAIL_DOMAIN} accounts. You are signed
-            in as <strong>{claims.email}</strong>.
+            {claims.email ? (
+              <>
+                This app is limited to @{ALLOWED_EMAIL_DOMAIN} accounts. You are
+                signed in as <strong>{claims.email}</strong>.
+              </>
+            ) : (
+              <>
+                Your sign-in succeeded, but the ID token carried no email claim,
+                so we cannot check your domain. This usually means the
+                application is not releasing the <code>email</code> attribute —
+                or you signed in through a federated connection that does not
+                map it.
+              </>
+            )}
           </p>
           <button
             onClick={() => signOut()}
