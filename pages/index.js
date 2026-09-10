@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useAppAuth } from "../components/useAppAuth";
+import SignedOutLanding from "../components/SignedOutLanding";
+import { ALLOWED_EMAIL_DOMAIN } from "../lib/config";
 
 const STALE_DAYS = 14;
 
@@ -61,23 +63,48 @@ export default function Dashboard() {
     }
   }
 
-  if (isLoading) return <p style={{ padding: 24 }}>Loading…</p>;
-
+  // Deliberately not gated on isLoading: Asgardeo's session check can take
+  // many seconds, and blocking on it left visitors staring at a bare
+  // "Loading…" with no idea what the app was. Show the landing page straight
+  // away and let the session check resolve behind it.
   if (!isAuthenticated) {
     return (
-      <div style={{ padding: 48, fontFamily: "sans-serif" }}>
-        <h2>Team Status Tracker</h2>
-        <button onClick={() => signIn()}>Sign in with Asgardeo</button>
-      </div>
+      <SignedOutLanding
+        onSignIn={() => signIn()}
+        allowedDomain={ALLOWED_EMAIL_DOMAIN}
+        checkingSession={isLoading}
+      />
     );
   }
 
   if (claims && !claims.allowedDomain) {
     return (
-      <div style={{ padding: 48, fontFamily: "sans-serif" }}>
-        <h2>Access restricted</h2>
-        <p>This app is limited to @wso2.com accounts. You're signed in as {claims.email}.</p>
-        <button onClick={() => signOut()}>Sign out</button>
+      <div style={{
+        minHeight: "100vh", display: "flex", alignItems: "center",
+        justifyContent: "center", padding: 24, fontFamily: "sans-serif",
+        background: "#f8fafc",
+      }}>
+        <div style={{
+          maxWidth: 420, textAlign: "center", background: "#fff", padding: 40,
+          borderRadius: 16, border: "1px solid #e2e8f0",
+        }}>
+          <h1 style={{ fontSize: 22, margin: "0 0 10px", color: "#0f172a" }}>
+            Access restricted
+          </h1>
+          <p style={{ color: "#475569", lineHeight: 1.6, margin: "0 0 20px" }}>
+            This app is limited to @{ALLOWED_EMAIL_DOMAIN} accounts. You are signed
+            in as <strong>{claims.email}</strong>.
+          </p>
+          <button
+            onClick={() => signOut()}
+            style={{
+              background: "#4f46e5", color: "#fff", border: 0, cursor: "pointer",
+              padding: "11px 22px", borderRadius: 8, fontSize: 14, fontWeight: 600,
+            }}
+          >
+            Sign out
+          </button>
+        </div>
       </div>
     );
   }
