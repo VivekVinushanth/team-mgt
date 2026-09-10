@@ -3,6 +3,21 @@ WORKDIR /app
 COPY package.json ./
 RUN npm install
 COPY . .
+
+# Next.js inlines NEXT_PUBLIC_* into the client bundle at BUILD time, so these
+# have to be present here — setting them only as runtime env vars leaves the
+# browser with `undefined` and Asgardeo sign-in fails. Server-side secrets
+# (M2M client secret, GitHub PAT) are deliberately NOT build args: they stay
+# runtime-only so they never land in an image layer.
+ARG NEXT_PUBLIC_ASGARDEO_CLIENT_ID
+ARG NEXT_PUBLIC_ASGARDEO_BASE_URL
+ARG NEXT_PUBLIC_ASGARDEO_SIGN_IN_REDIRECT_URL
+ARG NEXT_PUBLIC_ASGARDEO_SIGN_OUT_REDIRECT_URL
+ENV NEXT_PUBLIC_ASGARDEO_CLIENT_ID=$NEXT_PUBLIC_ASGARDEO_CLIENT_ID \
+    NEXT_PUBLIC_ASGARDEO_BASE_URL=$NEXT_PUBLIC_ASGARDEO_BASE_URL \
+    NEXT_PUBLIC_ASGARDEO_SIGN_IN_REDIRECT_URL=$NEXT_PUBLIC_ASGARDEO_SIGN_IN_REDIRECT_URL \
+    NEXT_PUBLIC_ASGARDEO_SIGN_OUT_REDIRECT_URL=$NEXT_PUBLIC_ASGARDEO_SIGN_OUT_REDIRECT_URL
+
 RUN npm run build
 
 FROM node:20-alpine

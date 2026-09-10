@@ -1,0 +1,15 @@
+# secrets — must never be baked into an image layer
+.env
+.env.local
+.env*.local
+
+# local reference material, not part of the app
+cds-wso3app/
+register-cds-schema*.sh
+
+# build/runtime artifacts
+node_modules
+.next
+.git
+.DS_Store
+*.log
