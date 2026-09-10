@@ -2,10 +2,10 @@ import { verifyRequest } from "../../../lib/auth-server";
 import { getAllocationsForWeek, setAllocation, getAllLeave } from "../../../lib/storage";
 import {
   canEditAllocation,
-  TEAM_ROSTER,
   ALLOCATION_CATEGORIES,
   LEAVE_TYPE_TO_ALLOCATION_CATEGORY,
 } from "../../../lib/config";
+import { getRoster } from "../../../lib/roster";
 import { currentISOWeek, weekOverlapsRange } from "../../../lib/weeks";
 
 export default async function handler(req, res) {
@@ -20,6 +20,13 @@ export default async function handler(req, res) {
     const week = req.query.week || currentISOWeek();
     const allocations = getAllocationsForWeek(week);
 
+    let roster;
+    try {
+      roster = await getRoster();
+    } catch (err) {
+      return res.status(502).json({ error: `Could not load roster from CDS: ${err.message}` });
+    }
+
     // Suggest (don't force) a category for anyone with active leave this
     // week who has no allocation entered yet — Leads can still override.
     const leave = getAllLeave();
@@ -32,7 +39,7 @@ export default async function handler(req, res) {
 
     return res.status(200).json({
       week,
-      roster: TEAM_ROSTER,
+      roster,
       categories: ALLOCATION_CATEGORIES,
       allocations,
       suggestions,

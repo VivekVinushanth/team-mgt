@@ -16,3 +16,7 @@ out/
 # logs
 *.log
 npm-debug.log*
+
+# local reference material, not part of this app
+cds-wso3app/
+register-cds-schema*.sh

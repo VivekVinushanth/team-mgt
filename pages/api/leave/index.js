@@ -1,6 +1,7 @@
 import { verifyRequest } from "../../../lib/auth-server";
 import { getAllLeave, addLeave } from "../../../lib/storage";
-import { canEditLeave, TEAM_ROSTER, LEAVE_TYPES } from "../../../lib/config";
+import { canEditLeave, LEAVE_TYPES } from "../../../lib/config";
+import { getRoster } from "../../../lib/roster";
 
 export default async function handler(req, res) {
   let user;
@@ -11,9 +12,16 @@ export default async function handler(req, res) {
   }
 
   if (req.method === "GET") {
+    let roster;
+    try {
+      roster = await getRoster();
+    } catch (err) {
+      return res.status(502).json({ error: `Could not load roster from CDS: ${err.message}` });
+    }
+
     return res.status(200).json({
       leave: getAllLeave(),
-      roster: TEAM_ROSTER,
+      roster,
       leaveTypes: LEAVE_TYPES,
     });
   }
