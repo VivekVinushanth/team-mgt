@@ -24,5 +24,15 @@ FROM node:20-alpine
 WORKDIR /app
 ENV NODE_ENV=production
 COPY --from=builder /app ./
+
+# Choreo's Dockerfile scan rejects images that run as root: it requires a
+# non-root USER with a numeric UID in the 10000-20000 range. The app also
+# writes its JSON stores under /app/data at runtime, so the same user needs
+# to own the tree.
+RUN addgroup -g 10001 -S nodejs \
+    && adduser -u 10001 -S nextjs -G nodejs \
+    && chown -R 10001:10001 /app
+USER 10001
+
 EXPOSE 3000
 CMD ["npm", "start"]
