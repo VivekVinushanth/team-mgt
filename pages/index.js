@@ -18,6 +18,11 @@ export default function Dashboard() {
   const [editing, setEditing] = useState(null);
   const [draft, setDraft] = useState({ status: "", comment: "", startDate: "", targetDate: "" });
   const [loadingIssues, setLoadingIssues] = useState(false);
+  // Asgardeo's SDK ignores signIn() until it has finished initialising, which
+  // can take many seconds — an early click was silently swallowed and the
+  // button looked broken. Remember the intent and fire it the moment the SDK
+  // is ready.
+  const [signInRequested, setSignInRequested] = useState(false);
   const [error, setError] = useState(null);
 
   useEffect(() => {
@@ -34,6 +39,10 @@ export default function Dashboard() {
       .catch((e) => setError(e.message))
       .finally(() => setLoadingIssues(false));
   }, [isAuthenticated, claims]);
+
+  useEffect(() => {
+    if (signInRequested && !isLoading) signIn();
+  }, [signInRequested, isLoading]);
 
   async function openEdit(issue) {
     const res = await authFetch(`/api/status/${encodeURIComponent(issue.id)}`);
@@ -70,9 +79,9 @@ export default function Dashboard() {
   if (!isAuthenticated) {
     return (
       <SignedOutLanding
-        onSignIn={() => signIn()}
         allowedDomain={ALLOWED_EMAIL_DOMAIN}
-        checkingSession={isLoading}
+        signingIn={signInRequested}
+        onSignIn={() => (isLoading ? setSignInRequested(true) : signIn())}
       />
     );
   }
